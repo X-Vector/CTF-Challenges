@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}User Dashboard{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="fas fa-user me-2"></i>Welcome, {{ current_user.username }}!</h2>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="fas fa-image me-2"></i>Profile Picture</h3>
+            </div>
+            <div class="card-body text-center">
+                {% if current_user.profile_picture %}
+                    <img src="{{ url_for('static', filename='uploads/' + current_user.profile_picture) }}"
+                         alt="Profile Picture" class="profile-picture mb-3">
+                {% else %}
+                    <i class="fas fa-user-circle fa-6x text-muted mb-3"></i>
+                    <p class="text-muted">No profile picture uploaded</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="fas fa-info-circle me-2"></i>Account Information</h3>
+            </div>
+            <div class="card-body">
+                {% if current_user.account_link %}
+                <div class="mb-3">
+                    <label class="form-label text-muted">Account Link</label>
+                    <p class="mb-0">
+                        <a href="{{ current_user.account_link }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-external-link-alt me-1"></i>Visit
+                        </a>
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0"><i class="fas fa-user-edit me-2"></i>Edit Profile</h3>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('update_user') }}" method="POST" enctype="multipart/form-data" id="updateForm">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">
+                            <i class="fas fa-user me-1"></i>Username
+                        </label>
+                        <input type="text" class="form-control" id="username" name="username"
+                               value="{{ current_user.username }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">
+                            <i class="fas fa-envelope me-1"></i>Email
+                        </label>
+                        <input type="email" class="form-control" id="email" name="email"
+                               value="{{ current_user.email }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">
+                            <i class="fas fa-lock me-1"></i>New Password
+                        </label>
+                        <input type="password" class="form-control" id="password" name="password"
+                               minlength="8">
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>Leave blank to keep current password
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="account_link" class="form-label">
+                            <i class="fas fa-link me-1"></i>Account Link
+                        </label>
+                        <input type="url" class="form-control" id="account_link" name="account_link"
+                               value="{{ current_user.account_link }}"
+                               placeholder="https://example.com">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="bio" class="form-label">
+                            <i class="fas fa-pencil-alt me-1"></i>Bio
+                        </label>
+                        <textarea class="form-control" id="bio" name="bio" rows="4"
+                                  placeholder="Tell us about yourself...">{{ message or '' }}</textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="profile_picture" class="form-label">
+                            <i class="fas fa-camera me-1"></i>Update Profile Picture
+                        </label>
+                        <input type="file" class="form-control" id="profile_picture" name="profile_picture"
+                               accept=".svg,.jpg,.png,.bmp">
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>Allowed file types: SVG, JPG, PNG, BMP (max 16MB)
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Update Profile
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('updateForm').addEventListener('submit', function(e) {
+    const password = document.getElementById('password').value;
+    const email = document.getElementById('email').value;
+    const username = document.getElementById('username').value;
+    const profilePicture = document.getElementById('profile_picture').files[0];
+    
+    // Password validation (if provided)
+    if (password && password.length < 8) {
+        e.preventDefault();
+        alert('Password must be at least 8 characters long');
+        return;
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        e.preventDefault();
+        alert('Please enter a valid email address');
+        return;
+    }
+    
+    // Username validation
+    if (username.length < 3) {
+        e.preventDefault();
+        alert('Username must be at least 3 characters long');
+        return;
+    }
+
+    // Profile picture validation
+    if (profilePicture) {
+        const allowedTypes = ['image/svg+xml', 'image/jpeg', 'image/png', 'image/bmp'];
+        const maxSize = 16 * 1024 * 1024; // 16MB in bytes
+
+        if (!allowedTypes.includes(profilePicture.type)) {
+            e.preventDefault();
+            alert('Invalid file type. Allowed types: SVG, JPG, PNG, BMP');
+            return;
+        }
+
+        if (profilePicture.size > maxSize) {
+            e.preventDefault();
+            alert('File size exceeds 16MB limit');
+            return;
+        }
+    }
+});
+</script>
+{% endblock %} 

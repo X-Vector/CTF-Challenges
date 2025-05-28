@@ -1,0 +1,1 @@
+put in bio {0.__class__.__init__.__globals__[app].config[FLAG]}

@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">Register</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('register') }}" enctype="multipart/form-data" id="registerForm">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required
+                                   minlength="3" maxlength="80">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required
+                                   minlength="8">
+                            <div class="form-text">Password must be at least 8 characters long</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="account_link" class="form-label">Account Link (optional)</label>
+                            <input type="url" class="form-control" id="account_link" name="account_link"
+                                   placeholder="https://example.com">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="bio" class="form-label">Bio (optional)</label>
+                            <textarea class="form-control" id="bio" name="bio" rows="4" 
+                                      placeholder="Tell us about yourself..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="profile_picture" class="form-label">Profile Picture (optional)</label>
+                            <input type="file" class="form-control" id="profile_picture" name="profile_picture"
+                                   accept=".svg,.jpg,.png,.bmp">
+                            <div class="form-text">Allowed file types: SVG, JPG, PNG, BMP (max 16MB)</div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Register</button>
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        Already have an account? <a href="{{ url_for('login') }}">Login here</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+    const password = document.getElementById('password').value;
+    const email = document.getElementById('email').value;
+    const username = document.getElementById('username').value;
+    const profilePicture = document.getElementById('profile_picture').files[0];
+    
+    // Password validation
+    if (password.length < 8) {
+        e.preventDefault();
+        alert('Password must be at least 8 characters long');
+        return;
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        e.preventDefault();
+        alert('Please enter a valid email address');
+        return;
+    }
+    
+    // Username validation
+    if (username.length < 3) {
+        e.preventDefault();
+        alert('Username must be at least 3 characters long');
+        return;
+    }
+
+    // Profile picture validation
+    if (profilePicture) {
+        const allowedTypes = ['image/svg+xml', 'image/jpeg', 'image/png', 'image/bmp'];
+        const maxSize = 16 * 1024 * 1024; // 16MB in bytes
+
+        if (!allowedTypes.includes(profilePicture.type)) {
+            e.preventDefault();
+            alert('Invalid file type. Allowed types: SVG, JPG, PNG, BMP');
+            return;
+        }
+
+        if (profilePicture.size > maxSize) {
+            e.preventDefault();
+            alert('File size exceeds 16MB limit');
+            return;
+        }
+    }
+});
+</script>
+{% endblock %} 
